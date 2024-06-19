@@ -35,9 +35,9 @@ Flash Simulation Model: RTL
 
 Building IP and Simulation:
 
-Tool: Vivado 2023.1
+Tool: Vivado 2023.1, ModelSim
 
-The project is successfully built, simulated, and synthesized using Vivado 2023.1.
+The project is successfully built, simulated, and synthesized using Vivado 2023.1 and ModelSim.
 
 
 
