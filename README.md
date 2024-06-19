@@ -25,7 +25,7 @@ https://github.com/cjhonlyone/NandFlashController
 
 Device Interface:
 
-Tested device: MT29F64G08AECABH1 (mode 0, 1K Bytes per Page)
+Tested device: MT29F64G08AECABH1 (mode 0, 1Kilo byte data)
 
 Interface: Asynchronous
 
