@@ -2,25 +2,38 @@
 
 Here we have two projects:
 
-•	The Project1 is based on the VHDL sources from https://opencores.org/projects/nand_controller , which is ported to VHDL. In this project only test bench is customized according to the target device. This project is used as a reference model.
+Project 1:
 
-•	The project2 is based on new design having both controller source code and test bench written in VHDL. 
+Based on the VHDL sources from OpenCores NAND Controller.
 
+https://opencores.org/projects/nand_controller
+
+The VHDL sources are ported, and only the test bench is customized according to the target device.
+
+This project serves as a reference model.
+
+Project 2:
+
+A new design with both the controller source code and test bench written in VHDL.
 Verification:
 
-•	Verification is done with Flash model from https://github.com/cjhonlyone/NandFlashController/tree/master/tb/m73a_nand_model
+Verification is conducted using the Flash model from GitHub.
 
-	Device Interface:
+https://github.com/cjhonlyone/NandFlashController
 
-•	Tested device: MT29F64G08AECABH1 (mode 0, 1K Bytes per Page)
+Device Interface:
 
-•	Interface is Asynchronous 
+Tested device: MT29F64G08AECABH1 (mode 0, 1K Bytes per Page)
 
-•	Simulation Model: RTL
+Interface: Asynchronous
 
-	Building IP and simulation:
+Simulation Model: RTL
 
-•	Vivado 2023.1 is used for successful build, simulation and synthesis.
+Building IP and Simulation:
+
+Tool: Vivado 2023.1
+
+The project is successfully built, simulated, and synthesized using Vivado 2023.1.
 
 
 
