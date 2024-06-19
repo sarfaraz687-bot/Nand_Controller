@@ -29,7 +29,7 @@ Tested device: MT29F64G08AECABH1 (mode 0, 1K Bytes per Page)
 
 Interface: Asynchronous
 
-Simulation Model: RTL
+Flash Simulation Model: RTL
 
 
 Building IP and Simulation:
