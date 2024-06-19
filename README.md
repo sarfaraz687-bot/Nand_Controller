@@ -12,6 +12,7 @@ The VHDL sources are ported, and only the test bench is customized according to 
 
 This project serves as a reference model.
 
+
 Project 2:
 
 A new design with both the controller source code and test bench written in VHDL.
@@ -21,6 +22,7 @@ Verification is conducted using the Flash model from GitHub.
 
 https://github.com/cjhonlyone/NandFlashController
 
+
 Device Interface:
 
 Tested device: MT29F64G08AECABH1 (mode 0, 1K Bytes per Page)
@@ -28,6 +30,7 @@ Tested device: MT29F64G08AECABH1 (mode 0, 1K Bytes per Page)
 Interface: Asynchronous
 
 Simulation Model: RTL
+
 
 Building IP and Simulation:
 
