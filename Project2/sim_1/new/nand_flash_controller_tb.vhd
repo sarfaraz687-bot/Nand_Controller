@@ -136,7 +136,12 @@ begin
     row_add_3_i <= x"01";
     
     -- fill the transmit fifo with 256 bytes
-    for i in 0 to 255 loop
+    for i in 0 to 1023 loop
+      --* if the fifo is full wait until it is not full then continue writing to the fifo
+      while(wr_fifo_full_i='1')loop
+        wr_rqst_i <= '0';
+        wait until rising_edge(clk_i);
+      end loop;
       wr_data_i <= std_logic_vector(to_unsigned(i, 8));
       wr_rqst_i <= '1';
       wait until rising_edge(clk_i);
@@ -145,7 +150,7 @@ begin
     wait until wr_busy_o ='0';
     
     -- send command and read  bytes in fifo
-    rd_size_i <= std_logic_vector(to_unsigned(255, 32));
+    rd_size_i <= std_logic_vector(to_unsigned(1024, 32));
     rd_cmd_i <= '1';
     wait until rd_busy_o = '1';
     rd_cmd_i <= '0';
