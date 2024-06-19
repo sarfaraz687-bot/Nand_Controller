@@ -16,6 +16,7 @@ This project serves as a reference model.
 Project 2:
 
 A new design with both the controller source code and test bench written in VHDL.
+
 Verification:
 
 Verification is conducted using the Flash model from GitHub.
