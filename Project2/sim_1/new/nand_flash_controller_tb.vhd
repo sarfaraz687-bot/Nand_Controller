@@ -137,7 +137,6 @@ begin
     
     -- fill the transmit fifo with 256 bytes
     for i in 0 to 1023 loop
-      --* if the fifo is full wait until it is not full then continue writing to the fifo
       while(wr_fifo_full_i='1')loop
         wr_rqst_i <= '0';
         wait until rising_edge(clk_i);
