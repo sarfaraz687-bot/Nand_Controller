@@ -34,6 +34,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity fifo is
   generic(
     g_data_width : integer := 8;
+    --* depth must be 2^n value
     g_fifo_depth : integer := 16;
     --*
     g_fwft : boolean := true);

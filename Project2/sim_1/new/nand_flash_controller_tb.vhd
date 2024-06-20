@@ -46,7 +46,8 @@ architecture behavior of nand_flash_controller_tb is
   signal wp_n_o    : std_logic;
   signal rb_n_i    : std_logic;
   signal rd_cmd_i    : std_logic;
-
+  signal s_wr_index : integer := 0;
+  signal s_ready_busy : std_logic;
 begin
 
   -- Clock generation
@@ -96,8 +97,10 @@ begin
       wr_Re_n_o        => wr_Re_n_o,
       ce_n_o           => ce_n_o,
       wp_n_o           => wp_n_o,
-      rb_n_i           => rb_n_i
+      rb_n_i           => s_ready_busy
     );
+  
+  s_ready_busy <= '1' when rb_n_i='H' else '0';
   
   dq_io <= dq_io_o when dq_oe_o='1' else "ZZZZZZZZ";
   
@@ -126,9 +129,10 @@ begin
     wait for 100 ns;
     
     -- wait until the memory controller initialize the nand flash
+    -- by sending reset command to memory
     wait until init_done_o='1';
     
-    -- set a col/row address to the controller
+    -- set a specific address to the controller
     col_add_1_i <= x"00";
     col_add_2_i <= x"00";
     row_add_1_i <= x"00";
@@ -136,33 +140,42 @@ begin
     row_add_3_i <= x"01";
     
     -- fill the transmit fifo with 256 bytes
-    for i in 0 to 1023 loop
+    for i in 0 to 1024 loop
       while(wr_fifo_full_i='1')loop
         wr_rqst_i <= '0';
-        wait until rising_edge(clk_i);
+        wait until rising_edge(clk_i);      
       end loop;
       wr_data_i <= std_logic_vector(to_unsigned(i, 8));
       wr_rqst_i <= '1';
+      s_wr_index <= s_wr_index + 1;
+      wait until rising_edge(clk_i);
+      wr_rqst_i <= '0';
       wait until rising_edge(clk_i);
     end loop;
     wr_rqst_i <= '0';
+    
+    -- wait until the controller is not busy with writing to flash memory
     wait until wr_busy_o ='0';
     
-    -- send command and read  bytes in fifo
+    -- set the required number of bytes to be read from memory
     rd_size_i <= std_logic_vector(to_unsigned(1024, 32));
     rd_cmd_i <= '1';
+    
+    -- wait until the controller starts reading from memory
     wait until rd_busy_o = '1';
     rd_cmd_i <= '0';
     wait until rd_busy_o = '0';
+    
     wait until rising_edge(clk_i);
     
-    for i in 0 to 255 loop
+    -- read the values from receive fifo
+    for i in 0 to 1023 loop
       rd_rqst_i <= '1';
       wait until rising_edge(clk_i);
     end loop;
     rd_rqst_i <= '0';
     
-    -- erase operation
+    -- send erase block command to the controller
     erase_block_i <= '1';
     wait until erase_busy_o = '1';
     erase_block_i <= '0';
@@ -174,10 +187,11 @@ begin
     wait until rd_busy_o = '1';
     rd_cmd_i <= '0';
     wait until rd_busy_o = '0';
+    
     wait until rising_edge(clk_i);
     
     -- read the values from receive fifo
-    for i in 0 to 255 loop
+    for i in 0 to 1023 loop
       rd_rqst_i <= '1';
       wait until rising_edge(clk_i);
     end loop;

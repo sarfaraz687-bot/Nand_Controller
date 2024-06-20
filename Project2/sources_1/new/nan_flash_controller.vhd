@@ -25,7 +25,8 @@ use IEEE.STD_LOGIC_1164.ALL;
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
+Library xpm;
+use xpm.vcomponents.all;
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx leaf cells in this code.
 --library UNISIM;
@@ -33,11 +34,11 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity nand_flash_controller is
   generic(
-  g_fifo_depth : integer := 256);
+  g_fifo_depth : integer := 1024);
     Port ( 
            -- active low reset
            rstn_i : in std_logic;
-           --* controller clock
+           -- controller clock
            clk_i   : in std_logic;
            
            -- address for the NAND FLASH
@@ -48,16 +49,15 @@ entity nand_flash_controller is
            row_add_3_i  : in std_logic_vector(7 downto 0);
            
            --*******************************************
-           -- write ports:
+           -- write ports fifo:
     
-           -- write data to be written in the flash memory
            wr_data_i    : in std_logic_vector(7 downto 0);
            wr_rqst_i    : in std_logic;
            wr_fifo_full_i : out std_logic;
            wr_busy_o   : out std_logic;
            
             --*******************************************
-           -- read ports:          
+           -- read ports fifo:          
            
            rd_size_i    : in std_logic_vector(31 downto 0);
            rd_cmd_i       : in std_logic;
@@ -68,11 +68,11 @@ entity nand_flash_controller is
   
            --*******************************************
            -- erase ports:             
-           
+
            erase_block_i  : in std_logic;
            erase_busy_o : out std_logic;
            
-           -- Memory ID
+           --* Memory ID
            memory_id_o : out std_logic_vector(47 downto 0);
            
            
@@ -100,7 +100,6 @@ architecture Behavioral of nand_flash_controller is
   generic(
     g_data_width : integer := 8;
     g_fifo_depth : integer := 256;
-    --*
     g_fwft : boolean := false);
   port ( 
     clk_i : in std_logic;
@@ -153,41 +152,73 @@ architecture Behavioral of nand_flash_controller is
   signal s_state, s_nxt_state : t_state_type;
 begin
  -- trnsmit fifo
- inst_tx_fifo: fifo
-    generic map(
-      g_data_width => 8,
-      g_fifo_depth => g_fifo_depth,
-      g_fwft       => true 
-    )
-    port map(
-      clk_i       => clk_i,
-      rstn_i      => rstn_i,
-      wr_en_i     => wr_rqst_i,
-      rd_en_i     => s_tx_fifo_rd_ena,
-      data_i      => wr_data_i,
-      fifo_full_o => wr_fifo_full_i,
-      fifo_empty_o=> s_tx_fifo_empty,
-      data_o      => s_tx_fifo_data_o
-    );
-    
+inst_tx_xpm_fifo : xpm_fifo_sync
+   generic map (
+      DOUT_RESET_VALUE => "0",    -- String
+      ECC_MODE => "no_ecc",       -- String
+      FIFO_MEMORY_TYPE => "block", -- String
+      FIFO_READ_LATENCY => 1,     -- DECIMAL
+      FIFO_WRITE_DEPTH => 256,   -- DECIMAL
+      FULL_RESET_VALUE => 0,      -- DECIMAL
+      PROG_EMPTY_THRESH => 0,    -- DECIMAL
+      PROG_FULL_THRESH => 0,     -- DECIMAL
+      RD_DATA_COUNT_WIDTH => 1,   -- DECIMAL
+      READ_DATA_WIDTH => 8,      -- DECIMAL
+      READ_MODE => "FWFT",         -- String
+      USE_ADV_FEATURES => "0000", -- String
+      WAKEUP_TIME => 0,           -- DECIMAL
+      WRITE_DATA_WIDTH => 8,     -- DECIMAL
+      WR_DATA_COUNT_WIDTH => 1    -- DECIMAL
+   )
+   port map (
+      dout => s_tx_fifo_data_o,
+      empty => s_tx_fifo_empty,
+      full  => wr_fifo_full_i,
+      din => wr_data_i, 
+      injectdbiterr => '0', 
+      injectsbiterr => '0', 
+      rd_en => s_tx_fifo_rd_ena,     
+      rst => '0',              
+      sleep => '0',                 
+      wr_clk => clk_i,              
+      wr_en => wr_rqst_i       
+
+   );
+   
  -- receive fifo
- inst_rx_fifo: fifo
-    generic map(
-      g_data_width => 8,
-      g_fifo_depth => 1024,
-      g_fwft       => false 
-    )
-    port map(
-      clk_i       => clk_i,
-      rstn_i      => rstn_i,
-      wr_en_i     => s_rx_fifo_wr_ena,
-      rd_en_i     => rd_byte_i,
-      data_i      => s_rx_fifo_data_i,
-      fifo_full_o => s_rx_fifo_full,
-      fifo_empty_o=> rd_fifo_empty_o,
-      data_o      => rd_data_o
-    );
-    
+inst_rx_fifo : xpm_fifo_sync
+   generic map (
+      DOUT_RESET_VALUE => "0",    -- String
+      ECC_MODE => "no_ecc",       -- String
+      FIFO_MEMORY_TYPE => "block", -- String
+      FIFO_READ_LATENCY => 1,     -- DECIMAL
+      FIFO_WRITE_DEPTH => 1024,   -- DECIMAL
+      FULL_RESET_VALUE => 0,      -- DECIMAL
+      PROG_EMPTY_THRESH => 0,    -- DECIMAL
+      PROG_FULL_THRESH => 0,     -- DECIMAL
+      RD_DATA_COUNT_WIDTH => 1,   -- DECIMAL
+      READ_DATA_WIDTH => 8,      -- DECIMAL
+      READ_MODE => "FWFT",         -- String
+      USE_ADV_FEATURES => "0000", -- String
+      WAKEUP_TIME => 0,           -- DECIMAL
+      WRITE_DATA_WIDTH => 8,     -- DECIMAL
+      WR_DATA_COUNT_WIDTH => 1    -- DECIMAL
+   )
+   port map (
+      dout => rd_data_o,
+      empty => rd_fifo_empty_o,
+      full  => s_rx_fifo_full,
+      din => s_rx_fifo_data_i, 
+      injectdbiterr => '0', 
+      injectsbiterr => '0', 
+      rd_en => rd_byte_i,     
+      rst => '0',              
+      sleep => '0',                 
+      wr_clk => clk_i,              
+      wr_en => s_rx_fifo_wr_ena       
+
+   );
+
     -- prepare the address for the fsm
     s_address(0) <= col_add_1_i;
     s_address(1) <= col_add_2_i;
@@ -517,7 +548,7 @@ begin
 	           clk_We_n_o <= '1';
 	         end if;
 	      
-	      --* read page close command
+	      -- read page close command
 	      when rd_page_close_st =>
 	         cle_o   <= '1';
 	         ale_o   <= '0';
