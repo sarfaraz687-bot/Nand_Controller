@@ -96,25 +96,6 @@ end nand_flash_controller;
 
 architecture Behavioral of nand_flash_controller is
 
-  component fifo is
-  generic(
-    g_data_width : integer := 8;
-    g_fifo_depth : integer := 256;
-    g_fwft : boolean := false);
-  port ( 
-    clk_i : in std_logic;
-    rstn_i : in std_logic;
-    wr_en_i : in std_logic;
-    rd_en_i : in std_logic;
-    data_i : in std_logic_vector(g_data_width-1 downto 0);
-    
-    fifo_full_o : out std_logic;
-    fifo_empty_o : out std_logic;
-    data_o : out std_logic_vector(g_data_width-1 downto 0)
-    );
-  end component fifo;
-
-
   signal s_delay_cnt : integer range 0 to 15 := 0;
   
   signal s_tx_fifo_rd_ena : std_logic;
